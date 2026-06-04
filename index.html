@@ -276,9 +276,9 @@
         <span class="param-label">סכום התחלתי</span>
         <span class="param-value" id="lbl-principal"></span>
       </div>
-      <input type="range" id="s-principal" min="0" max="20000" step="1000" value="10000"
+      <input type="range" id="s-principal" min="0" max="1500000" step="1000" value="750000"
              oninput="syncInput('s-principal','n-principal'); update()">
-      <input type="number" id="n-principal" class="param-input" min="0" value="10000" placeholder="הקלד סכום"
+      <input type="number" id="n-principal" class="param-input" min="0" value="750000" placeholder="הקלד סכום"
              oninput="updatePrincipalMax(); update()">
       <div class="range-labels"><span>₪0</span><span id="lbl-principal-max">₪20,000</span></div>
     </div>
@@ -289,9 +289,9 @@
         <span class="param-label">תקופה (שנים)</span>
         <span class="param-value" id="lbl-years" dir="ltr"></span>
       </div>
-      <input type="range" id="s-years" min="1" max="20" step="1" value="10"
+      <input type="range" id="s-years" min="1" max="60" step="1" value="30"
              oninput="syncInput('s-years','n-years'); update()">
-      <input type="number" id="n-years" class="param-input" min="1" value="10" placeholder="הקלד שנים"
+      <input type="number" id="n-years" class="param-input" min="1" value="30" placeholder="הקלד שנים"
              oninput="updateYearsMax(); update()">
       <div class="range-labels"><span>1 שנה</span><span id="lbl-years-max">20 שנה</span></div>
     </div>
@@ -302,9 +302,9 @@
         <span class="param-label">הפקדה חודשית</span>
         <span class="param-value" id="lbl-monthly"></span>
       </div>
-      <input type="range" id="s-monthly" min="0" max="1000" step="100" value="500"
+      <input type="range" id="s-monthly" min="0" max="10000" step="100" value="5000"
              oninput="syncInput('s-monthly','n-monthly'); update()">
-      <input type="number" id="n-monthly" class="param-input" min="0" value="500" placeholder="הקלד סכום"
+      <input type="number" id="n-monthly" class="param-input" min="0" value="5000" placeholder="הקלד סכום"
              oninput="updateMonthlyMax(); update()">
       <div class="range-labels"><span>₪0</span><span id="lbl-monthly-max">₪1,000</span></div>
     </div>
@@ -312,7 +312,7 @@
     <!-- Riburit -->
     <div class="rate-row">
       <label>ריבית שנתית (%)</label>
-      <input type="number" id="n-rate" min="0" max="50" step="0.1" value="7"
+      <input type="number" id="n-rate" min="0" max="50" step="0.1" value="10"
              oninput="update()">
     </div>
 
