@@ -233,7 +233,31 @@
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
     @media (max-width: 700px) {
-      .layout { grid-template-columns: 1fr; }
+      body { padding: 16px 12px; }
+
+      h1 { font-size: 1.2rem; margin-bottom: 18px; }
+
+      .layout { grid-template-columns: 1fr; gap: 14px; }
+
+      .panel, .chart-panel { padding: 16px; border-radius: 12px; }
+
+      .param { margin-bottom: 18px; }
+
+      .param-value { font-size: 1rem; }
+
+      .cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .card { padding: 10px 8px; }
+      .card .val { font-size: 0.95rem; }
+      .card.big .val { font-size: 1.25rem; }
+      .card .lbl { font-size: 0.68rem; }
+
+      .chart-container { height: 200px; }
+
+      .tbl-scroll { max-height: 200px; }
+      table { font-size: 0.75rem; }
+      thead th, tbody td { padding: 6px 8px; }
+
+      .rate-row input[type=number] { width: 70px; }
     }
   </style>
 </head>
