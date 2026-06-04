@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מחשבון ריבית דריבית</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #2563eb, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      width: 100%;
+      max-width: 980px;
+    }
+
+    /* ---- Panel ---- */
+    .panel {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    /* ---- Sliders ---- */
+    .param { margin-bottom: 26px; }
+
+    .param-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .param-label { font-size: 0.82rem; color: #64748b; }
+
+    .param-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #2563eb;
+      min-width: 100px;
+      text-align: left;
+      direction: ltr;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 4px;
+      background: #e2e8f0;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #2563eb;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 2px #2563eb, 0 2px 6px rgba(37,99,235,0.35);
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* ---- Result cards ---- */
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .card.big {
+      grid-column: 1 / -1;
+      border-color: #93c5fd;
+      background: #eff6ff;
+    }
+
+    .card .val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1d4ed8;
+      direction: ltr;
+      display: block;
+    }
+
+    .card.big .val { font-size: 1.55rem; color: #2563eb; }
+
+    .card .lbl {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* ---- Chart panel ---- */
+    .chart-panel {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .chart-panel h2 {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    canvas { flex: 1; min-height: 260px; }
+
+    /* ---- Table ---- */
+    .table-wrap {
+      margin-top: 24px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .tbl-scroll { max-height: 220px; overflow-y: auto; }
+    .tbl-scroll::-webkit-scrollbar { width: 5px; }
+    .tbl-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+
+    thead th {
+      background: #f1f5f9;
+      color: #64748b;
+      font-weight: 600;
+      padding: 9px 12px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    tbody td { padding: 8px 12px; text-align: center; color: #334155; border-bottom: 1px solid #f1f5f9; }
+    tbody tr:last-child td { border-bottom: none; background: #eff6ff; color: #1d4ed8; font-weight: 700; }
+
+    /* ---- Rate input ---- */
+    .rate-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 26px;
+    }
+
+    .rate-row label { font-size: 0.82rem; color: #64748b; flex: 1; }
+
+    .rate-row input[type=number] {
+      width: 80px;
+      padding: 6px 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      color: #2563eb;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+    }
+
+    .rate-row input[type=number]:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+
+    /* hide number arrows */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>מחשבון ריבית דריבית</h1>
+
+<div class="layout">
+
+  <!-- LEFT: controls -->
+  <div class="panel">
+
+    <!-- Sickum hatchali -->
+    <div class="param">
+      <div class="param-header">
+        <span class="param-label">סכום התחלתי</span>
+        <span class="param-value" id="lbl-principal"></span>
+      </div>
+      <input type="range" id="s-principal" min="0" max="500000" step="1000" value="10000"
+             oninput="update()">
+      <div class="range-labels"><span>₪0</span><span>₪500,000</span></div>
+    </div>
+
+    <!-- Tkufa -->
+    <div class="param">
+      <div class="param-header">
+        <span class="param-label">תקופה (שנים)</span>
+        <span class="param-value" id="lbl-years"></span>
+      </div>
+      <input type="range" id="s-years" min="1" max="40" step="1" value="10"
+             oninput="update()">
+      <div class="range-labels"><span>1 שנה</span><span>40 שנה</span></div>
+    </div>
+
+    <!-- Sumachodshi -->
+    <div class="param">
+      <div class="param-header">
+        <span class="param-label">הפקדה חודשית</span>
+        <span class="param-value" id="lbl-monthly"></span>
+      </div>
+      <input type="range" id="s-monthly" min="0" max="10000" step="100" value="500"
+             oninput="update()">
+      <div class="range-labels"><span>₪0</span><span>₪10,000</span></div>
+    </div>
+
+    <!-- Riburit -->
+    <div class="rate-row">
+      <label>ריבית שנתית (%)</label>
+      <input type="number" id="n-rate" min="0" max="50" step="0.1" value="7"
+             oninput="update()">
+    </div>
+
+    <!-- Result cards -->
+    <div class="cards">
+      <div class="card big">
+        <span class="val" id="r-total">—</span>
+        <span class="lbl">סכום סופי</span>
+      </div>
+      <div class="card">
+        <span class="val" id="r-deposited">—</span>
+        <span class="lbl">סה"כ הפקדות</span>
+      </div>
+      <div class="card">
+        <span class="val" id="r-interest">—</span>
+        <span class="lbl">ריבית שנצברה</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: chart + table -->
+  <div class="chart-panel">
+    <h2>צמיחת ההשקעה לאורך השנים</h2>
+    <canvas id="chart"></canvas>
+
+    <div class="table-wrap">
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>שנה</th>
+              <th>סה"כ הפקדות</th>
+              <th>ריבית שנצברה</th>
+              <th>סכום סופי</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const fmt = n => '₪' + Math.round(n).toLocaleString('he-IL');
+
+  // Chart setup
+  const ctx = document.getElementById('chart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: 'הפקדות',
+          data: [],
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37,99,235,0.08)',
+          pointBackgroundColor: '#2563eb',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true,
+          tension: 0.35,
+        },
+        {
+          label: 'סכום סופי (קרן + ריבית)',
+          data: [],
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22,163,74,0.07)',
+          pointBackgroundColor: '#16a34a',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true,
+          tension: 0.35,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 180 },
+      plugins: {
+        legend: {
+          labels: { color: '#64748b', font: { size: 12 }, boxWidth: 12 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + ctx.dataset.label + ': ' + fmt(ctx.raw)
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#94a3b8', font: { size: 11 } },
+          grid: { color: 'rgba(226,232,240,0.8)' }
+        },
+        y: {
+          ticks: {
+            color: '#94a3b8',
+            font: { size: 11 },
+            callback: v => '₪' + (v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v)
+          },
+          grid: { color: 'rgba(226,232,240,0.8)' }
+        }
+      }
+    }
+  });
+
+  function update() {
+    const P      = parseFloat(document.getElementById('s-principal').value) || 0;
+    const years  = parseInt(document.getElementById('s-years').value) || 1;
+    const monthly= parseFloat(document.getElementById('s-monthly').value) || 0;
+    const rate   = parseFloat(document.getElementById('n-rate').value) || 0;
+    const n      = 12; // monthly compounding
+
+    // Labels
+    document.getElementById('lbl-principal').textContent = fmt(P);
+    document.getElementById('lbl-years').textContent     = years + ' שנה';
+    document.getElementById('lbl-monthly').textContent   = fmt(monthly) + '/חודש';
+
+    // Calculate year by year
+    let balance = P;
+    let totalDeposited = P;
+    const labels = [], depositsArr = [], totalArr = [];
+
+    const tbody = document.getElementById('tbl-body');
+    tbody.innerHTML = '';
+
+    for (let y = 1; y <= years; y++) {
+      for (let m = 0; m < 12; m++) {
+        balance = balance * (1 + rate / 100 / n) + monthly;
+      }
+      totalDeposited += monthly * 12;
+      const interest = Math.max(0, balance - totalDeposited);
+
+      labels.push('שנה ' + y);
+      depositsArr.push(Math.round(totalDeposited));
+      totalArr.push(Math.round(balance));
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${y}</td><td>${fmt(totalDeposited)}</td><td>${fmt(interest)}</td><td>${fmt(balance)}</td>`;
+      tbody.appendChild(tr);
+    }
+
+    const totalInterest = Math.max(0, balance - totalDeposited);
+
+    document.getElementById('r-total').textContent     = fmt(balance);
+    document.getElementById('r-deposited').textContent = fmt(totalDeposited);
+    document.getElementById('r-interest').textContent  = fmt(totalInterest);
+
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = depositsArr;
+    chart.data.datasets[1].data = totalArr;
+    chart.update();
+  }
+
+  update();
+</script>
+</body>
+</html>
