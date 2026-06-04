@@ -211,6 +211,23 @@
 
     .rate-row input[type=number]:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
 
+    .param-input {
+      width: 100%;
+      padding: 7px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      color: #2563eb;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      margin-top: 8px;
+      direction: ltr;
+    }
+
+    .param-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+
     /* hide number arrows */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
@@ -235,9 +252,11 @@
         <span class="param-label">סכום התחלתי</span>
         <span class="param-value" id="lbl-principal"></span>
       </div>
-      <input type="range" id="s-principal" min="0" max="500000" step="1000" value="10000"
-             oninput="update()">
-      <div class="range-labels"><span>₪0</span><span>₪500,000</span></div>
+      <input type="range" id="s-principal" min="0" max="20000" step="1000" value="10000"
+             oninput="syncInput('s-principal','n-principal'); update()">
+      <input type="number" id="n-principal" class="param-input" min="0" value="10000" placeholder="הקלד סכום"
+             oninput="updatePrincipalMax(); update()">
+      <div class="range-labels"><span>₪0</span><span id="lbl-principal-max">₪20,000</span></div>
     </div>
 
     <!-- Tkufa -->
@@ -246,9 +265,11 @@
         <span class="param-label">תקופה (שנים)</span>
         <span class="param-value" id="lbl-years" dir="ltr"></span>
       </div>
-      <input type="range" id="s-years" min="1" max="40" step="1" value="10"
-             oninput="update()">
-      <div class="range-labels"><span>1 שנה</span><span>40 שנה</span></div>
+      <input type="range" id="s-years" min="1" max="20" step="1" value="10"
+             oninput="syncInput('s-years','n-years'); update()">
+      <input type="number" id="n-years" class="param-input" min="1" value="10" placeholder="הקלד שנים"
+             oninput="updateYearsMax(); update()">
+      <div class="range-labels"><span>1 שנה</span><span id="lbl-years-max">20 שנה</span></div>
     </div>
 
     <!-- Sumachodshi -->
@@ -257,9 +278,11 @@
         <span class="param-label">הפקדה חודשית</span>
         <span class="param-value" id="lbl-monthly"></span>
       </div>
-      <input type="range" id="s-monthly" min="0" max="10000" step="100" value="500"
-             oninput="update()">
-      <div class="range-labels"><span>₪0</span><span>₪10,000</span></div>
+      <input type="range" id="s-monthly" min="0" max="1000" step="100" value="500"
+             oninput="syncInput('s-monthly','n-monthly'); update()">
+      <input type="number" id="n-monthly" class="param-input" min="0" value="500" placeholder="הקלד סכום"
+             oninput="updateMonthlyMax(); update()">
+      <div class="range-labels"><span>₪0</span><span id="lbl-monthly-max">₪1,000</span></div>
     </div>
 
     <!-- Riburit -->
@@ -382,10 +405,48 @@
     }
   });
 
+  function updatePrincipalMax() {
+    const val = parseFloat(document.getElementById('n-principal').value) || 0;
+    const max = Math.max(val * 2, 1000);
+    const slider = document.getElementById('s-principal');
+    slider.max = max;
+    slider.value = Math.min(val, max);
+    const fmt2 = n => '₪' + Math.round(n).toLocaleString('he-IL');
+    document.getElementById('lbl-principal-max').textContent = fmt2(max);
+  }
+
+  function updateYearsMax() {
+    const val = parseInt(document.getElementById('n-years').value) || 1;
+    const max = Math.max(val * 2, 2);
+    const slider = document.getElementById('s-years');
+    slider.max = max;
+    slider.value = Math.min(val, max);
+    document.getElementById('lbl-years-max').textContent = max + ' שנה';
+  }
+
+  function updateMonthlyMax() {
+    const val = parseFloat(document.getElementById('n-monthly').value) || 0;
+    const max = Math.max(val * 2, 1000);
+    const slider = document.getElementById('s-monthly');
+    slider.max = max;
+    slider.value = Math.min(val, max);
+    const fmt2 = n => '₪' + Math.round(n).toLocaleString('he-IL');
+    document.getElementById('lbl-monthly-max').textContent = fmt2(max);
+  }
+
+  function syncInput(sliderId, inputId) {
+    document.getElementById(inputId).value = document.getElementById(sliderId).value;
+  }
+
+  function syncSlider(inputId, sliderId, min, max) {
+    const val = parseFloat(document.getElementById(inputId).value) || min;
+    document.getElementById(sliderId).value = Math.min(Math.max(val, min), max);
+  }
+
   function update() {
-    const P      = parseFloat(document.getElementById('s-principal').value) || 0;
-    const years  = parseInt(document.getElementById('s-years').value) || 1;
-    const monthly= parseFloat(document.getElementById('s-monthly').value) || 0;
+    const P      = parseFloat(document.getElementById('n-principal').value) || 0;
+    const years  = parseInt(document.getElementById('n-years').value) || 1;
+    const monthly= parseFloat(document.getElementById('n-monthly').value) || 0;
     const rate   = parseFloat(document.getElementById('n-rate').value) || 0;
     const n      = 12; // monthly compounding
 
