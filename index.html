@@ -244,7 +244,7 @@
     <div class="param">
       <div class="param-header">
         <span class="param-label">תקופה (שנים)</span>
-        <span class="param-value" id="lbl-years"></span>
+        <span class="param-value" id="lbl-years" dir="ltr"></span>
       </div>
       <input type="range" id="s-years" min="1" max="40" step="1" value="10"
              oninput="update()">
@@ -391,7 +391,7 @@
 
     // Labels
     document.getElementById('lbl-principal').textContent = fmt(P);
-    document.getElementById('lbl-years').textContent     = years + ' שנה';
+    document.getElementById('lbl-years').textContent = years + ' ' + (years===1?'שנה':'שנים');
     document.getElementById('lbl-monthly').textContent   = fmt(monthly) + '/חודש';
 
     // Calculate year by year
