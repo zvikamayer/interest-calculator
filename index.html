@@ -10,7 +10,7 @@
 
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f0f4f8;
+      background: linear-gradient(135deg, #e0eaff 0%, #f0f4ff 40%, #e8f5e9 100%);
       color: #1a202c;
       min-height: 100vh;
       display: flex;
@@ -129,6 +129,9 @@
     }
 
     .card.big .val { font-size: 1.55rem; color: #2563eb; }
+
+    .card.big.after-tax { border-color: #86efac; background: #f0fdf4; }
+    .card.big.after-tax .val { color: #16a34a; }
 
     .card .lbl {
       font-size: 0.72rem;
@@ -330,6 +333,10 @@
         <span class="val" id="r-interest">—</span>
         <span class="lbl">ריבית שנצברה</span>
       </div>
+      <div class="card big after-tax">
+        <span class="val" id="r-after-tax">—</span>
+        <span class="lbl">סכום למשיכה אחרי מס רווחי הון (25%)</span>
+      </div>
     </div>
 
   </div>
@@ -504,10 +511,13 @@
     }
 
     const totalInterest = Math.max(0, balance - totalDeposited);
+    const tax = totalInterest * 0.25;
+    const afterTax = balance - tax;
 
     document.getElementById('r-total').textContent     = fmt(balance);
     document.getElementById('r-deposited').textContent = fmt(totalDeposited);
     document.getElementById('r-interest').textContent  = fmt(totalInterest);
+    document.getElementById('r-after-tax').textContent = fmt(afterTax);
 
     chart.data.labels = labels;
     chart.data.datasets[0].data = depositsArr;
