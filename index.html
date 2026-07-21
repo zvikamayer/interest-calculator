@@ -312,6 +312,19 @@
       <div class="range-labels"><span>₪0</span><span id="lbl-monthly-max">₪1,000</span></div>
     </div>
 
+    <!-- Ichur התחלת השקעה -->
+    <div class="param">
+      <div class="param-header">
+        <span class="param-label">תתחיל הפקדה חודשית בעוד</span>
+        <span class="param-value" id="lbl-delay" dir="ltr">0 שנים</span>
+      </div>
+      <input type="range" id="s-delay" min="0" max="15" step="1" value="0"
+             oninput="syncInput('s-delay','n-delay'); update()">
+      <input type="number" id="n-delay" class="param-input" min="0" max="15" value="0" placeholder="0-15 שנים"
+             oninput="syncSlider('n-delay','s-delay',0,15); update()">
+      <div class="range-labels"><span>עכשיו</span><span>15 שנה</span></div>
+    </div>
+
     <!-- Riburit -->
     <div class="rate-row">
       <label>ריבית שנתית (%)</label>
@@ -479,12 +492,14 @@
     const years  = parseInt(document.getElementById('n-years').value) || 1;
     const monthly= parseFloat(document.getElementById('n-monthly').value) || 0;
     const rate   = parseFloat(document.getElementById('n-rate').value) || 0;
-    const n      = 12; // monthly compounding
+    const delay  = Math.min(parseInt(document.getElementById('n-delay').value) || 0, years);
+    const n      = 12;
 
     // Labels
     document.getElementById('lbl-principal').textContent = fmt(P);
     document.getElementById('lbl-years').textContent = years + ' ' + (years===1?'שנה':'שנים');
     document.getElementById('lbl-monthly').textContent   = fmt(monthly) + '/חודש';
+    document.getElementById('lbl-delay').textContent = delay === 0 ? 'עכשיו' : delay + ' ' + (delay===1?'שנה':'שנים');
 
     // Calculate year by year
     let balance = P;
@@ -495,10 +510,11 @@
     tbody.innerHTML = '';
 
     for (let y = 1; y <= years; y++) {
+      const monthlyThisYear = y > delay ? monthly : 0;
       for (let m = 0; m < 12; m++) {
-        balance = balance * (1 + rate / 100 / n) + monthly;
+        balance = balance * (1 + rate / 100 / n) + monthlyThisYear;
       }
-      totalDeposited += monthly * 12;
+      totalDeposited += monthlyThisYear * 12;
       const interest = Math.max(0, balance - totalDeposited);
 
       labels.push('שנה ' + y);
